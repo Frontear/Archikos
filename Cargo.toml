@@ -1,0 +1,7 @@
+[package]
+name = "archikos"
+version = "0.1.0"
+authors = ["Ali Rizvi"]
+edition = "2018"
+
+[dependencies]
