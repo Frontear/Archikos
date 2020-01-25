@@ -1,8 +1,20 @@
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::prelude::*;
+use std::io::SeekFrom;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
-
 use walkdir::{DirEntry, WalkDir};
+
+fn dir_iter<P: AsRef<Path>>(path: P) -> Vec<DirEntry> {
+    let entries: Vec<_> = WalkDir::new(path)
+        .into_iter()
+        .filter(|x| x.as_ref().expect("Failed to process path").path().is_file())
+        .map(|x| x.unwrap())
+        .collect();
+
+    return entries;
+}
 
 fn input_paths() -> Vec<String> {
     let mut paths: Vec<_> = env::args()
@@ -25,19 +37,7 @@ fn input_paths() -> Vec<String> {
     return paths;
 }
 
-fn dir_iter<P: AsRef<Path>>(path: P) -> Vec<DirEntry> {
-    let entries: Vec<_> = WalkDir::new(path)
-        .into_iter()
-        .filter(|x| x.as_ref().expect("Failed to process path").path().is_file())
-        .map(|x| x.unwrap())
-        .collect();
-
-    return entries;
-}
-
-fn main() {
-    let paths = input_paths();
-
+fn map_fs(paths: Vec<String>) -> HashMap<u64, Vec<PathBuf>> {
     let mut files: HashMap<u64, Vec<PathBuf>> = HashMap::new();
     for path in paths {
         for entry in dir_iter(path) {
@@ -48,5 +48,59 @@ fn main() {
         }
     }
 
-    println!("{:#?}", files);
+    return files;
+}
+
+fn main() {
+    let paths = input_paths();
+    let files = map_fs(paths);
+
+    let mut dupes: HashMap<u64, Vec<PathBuf>> = HashMap::new();
+
+    for (key, v) in files {
+        if v.len() == 1 {
+            continue;
+        }
+
+        for p1 in &v {
+            let mut f1 = File::open(p1).expect("Failed to open file");
+            f1.seek(SeekFrom::Start(0))
+                .expect("Failed to offset read to beginning");
+            let mut b1: Vec<u8> = Vec::new();
+            f1.read_to_end(&mut b1)
+                .expect("Failed to read file to buffer");
+            let mut dupe = false;
+
+            for p2 in &v {
+                if p1 == p2 {
+                    continue;
+                }
+
+                let mut f2 = File::open(p2).expect("Failed to open file");
+                f2.seek(SeekFrom::Start(0))
+                    .expect("Failed to offset read to beginning");
+                let mut b2: Vec<u8> = Vec::new();
+                f2.read_to_end(&mut b2)
+                    .expect("Failed to read file to buffer");
+
+                if b1 != b2 {
+                    continue;
+                }
+
+                let value = dupes.entry(key).or_insert(Vec::new());
+
+                if !dupe {
+                    dupe = true;
+
+                    value.push(p1.to_path_buf());
+                }
+
+                value.push(p2.to_path_buf());
+            }
+
+            break;
+        }
+
+        println!("{:#?}", dupes);
+    }
 }
