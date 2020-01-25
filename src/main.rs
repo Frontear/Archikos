@@ -1,7 +1,7 @@
 use std::env;
 use std::path::Path;
 
-fn main() {
+fn input_paths() -> Vec<String> {
     let mut paths: Vec<_> = env::args()
         .skip(1) // ignore binary path
         .filter(|x| {
@@ -18,5 +18,11 @@ fn main() {
 
     paths.sort();
     paths.dedup(); // remove duplicate paths
+
+    return paths;
+}
+
+fn main() {
+    let paths = input_paths();
     println!("{:?}", paths);
 }
