@@ -1,6 +1,8 @@
 use std::env;
 use std::path::Path;
 
+use walkdir::{DirEntry, Error, WalkDir};
+
 fn input_paths() -> Vec<String> {
     let mut paths: Vec<_> = env::args()
         .skip(1) // ignore binary path
@@ -22,7 +24,16 @@ fn input_paths() -> Vec<String> {
     return paths;
 }
 
+fn dir_iter<P: AsRef<Path>>(path: P) -> Vec<DirEntry> {
+    let entries: Vec<_> = WalkDir::new(path)
+        .into_iter()
+        .filter(|x| x.as_ref().expect("Failed to process path").path().is_file())
+        .map(|x| x.unwrap())
+        .collect();
+
+    return entries;
+}
+
 fn main() {
     let paths = input_paths();
-    println!("{:?}", paths);
 }
