@@ -51,10 +51,7 @@ fn map_fs(paths: Vec<String>) -> HashMap<u64, Vec<PathBuf>> {
     return files;
 }
 
-fn main() {
-    let paths = input_paths();
-    let files = map_fs(paths);
-
+fn map_sd(files: HashMap<u64, Vec<PathBuf>>) -> HashMap<u64, Vec<PathBuf>> {
     let mut dupes: HashMap<u64, Vec<PathBuf>> = HashMap::new();
 
     for (key, v) in files {
@@ -100,7 +97,13 @@ fn main() {
 
             break;
         }
-
-        println!("{:#?}", dupes);
     }
+
+    return dupes;
+}
+
+fn main() {
+    let paths = input_paths();
+    let files = map_fs(paths);
+    let dupes = map_sd(files);
 }
