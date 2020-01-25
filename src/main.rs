@@ -106,4 +106,17 @@ fn main() {
     let paths = input_paths();
     let files = map_fs(paths);
     let dupes = map_sd(files);
+
+    for (_, v) in dupes {
+        if v.len() == 1 {
+            continue;
+        }
+
+        println!("Found duplicates:");
+        for dupe in v {
+            println!("\t- {}", dupe.display());
+        }
+
+        println!("")
+    }
 }
